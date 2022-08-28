@@ -21,7 +21,8 @@ const calculation = (currentValue) => {
     // console.log(pi, "????")
 
     let i = 1;
-    let x = BigNumber(3).times(BigNumber(10).exponentiatedBy(BigNumber(100)))
+    // let x = BigNumber(3).times(BigNumber(10).exponentiatedBy(BigNumber(100)))
+    let x = BigNumber(3)
     let pi = x;
     while (x > 0) {
         x = BigNumber(x).times(i).div((BigNumber(i).plus(1)).times(4))
@@ -31,21 +32,22 @@ const calculation = (currentValue) => {
 
     // pi = BigNumber(pi).toFixed(4)
     // pi = BigNumber(pi).div(BigNumber(10).exponentiatedBy(BigNumber(100)))
+    return BigNumber(pi).toPrecision(100)
 
     console.log(pi.toPrecision(100), "pi values")
 }
 
-routes.get('/hello-world',  (req, res) => {
+routes.get('/calc-pi',  (req, res) => {
     let currData = "0";
     fs.readFile("./current.json", "utf8", (err, data) => {
         currData = data;
     })
 
-    calculation("0");
+    currData = calculation("0");
 
-    if(currData === "0") {
-        currData = "3"
-    }
+    // if(currData === "0") {
+    //     currData = "3"
+    // }
 
     fs.writeFile("./current.json", currData, () => {})
     res.send(currData)
