@@ -2,7 +2,11 @@ const bodyParser = require("body-parser");
 const { json } = require("body-parser");
 const express = require("express");
 const Routes = require("./Routes");
+const cors = require("cors")
+
 const app = express();
+
+app.use(cors());
 app.use("/api", Routes);
 
 // not used -----------

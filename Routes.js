@@ -74,7 +74,7 @@ routes.get("/calc-pi-async", async (req, res) => {
     let t = await calculationAsync(currAcc)
     currData = BigNumber(t)
 
-    if (data.length === currData.toString().length) {
+    if (data?.length === currData.toString().length) {
       t = await calculationAsync(currAcc + 1)
       currData = BigNumber(t)
     }
