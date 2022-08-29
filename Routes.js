@@ -85,7 +85,7 @@ routes.get("/calc-pi-async", async (req, res) => {
 });
 
 routes.get("/reset-pi", (req, res) => {
-  let resetVal = BigNumber(calculation(1)).toString();
+  // let resetVal = BigNumber(calculation(1)).toString();
   fs.writeFile("./current.json", "", () => { });
   res.send("true");
 });
