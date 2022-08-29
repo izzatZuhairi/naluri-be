@@ -1,56 +1,93 @@
 const { default: BigNumber } = require("bignumber.js");
-const { Router } = require("express")
-const fs = require("fs")
+const { Router } = require("express");
+const fs = require("fs");
 
 const routes = Router();
 
-// routes.use((req, res, next) => {
-//     next();
-// })
-const calculation = (currentValue) => {
-    // let i = 1n;
-    // let x = 3n * (10n **(BigInt(10) + 20n));
-    // let pi = x;
-    // while (x > 0) {
-    //         x = x * i / ((i + 1n) * 4n);
-    //         pi += x / (i + 2n);
-    //         i += 2n;
-    // }
-    // // console.log(pi / (10n ** 20n))
-    // console.log((BigInt(1) + 20n))
-    // console.log(pi, "????")
+const calculation = (accuracy) => {
+  let i = 1;
+  let x = 3;
+  let pi = x;
+  while (x > 0) {
+    x = BigNumber(x).times(i).div(BigNumber(i).plus(1).times(4));
+    pi = BigNumber(pi).plus(BigNumber(x).div(BigNumber(i).plus(2)));
+    i = BigNumber(i).plus(2);
+  }
 
-    let i = 1;
-    // let x = BigNumber(3).times(BigNumber(10).exponentiatedBy(BigNumber(100)))
-    let x = BigNumber(3)
-    let pi = x;
-    while (x > 0) {
-        x = BigNumber(x).times(i).div((BigNumber(i).plus(1)).times(4))
-        pi = BigNumber(pi).plus(BigNumber(x).div((BigNumber(i).plus(2))))
-        i = BigNumber(i).plus(2)
+  return pi.toPrecision(accuracy);
+};
+
+routes.get("/calc-pi", (req, res) => {
+  let currData = "0";
+  let currAcc = 0;
+  fs.readFile("./current.json", "utf8", (err, data) => {
+    if (!data) {
+      currAcc = 1;
+    } else {
+      currAcc = data.split(".").join("").length + 1;
     }
 
-    // pi = BigNumber(pi).toFixed(4)
-    // pi = BigNumber(pi).div(BigNumber(10).exponentiatedBy(BigNumber(100)))
-    return BigNumber(pi).toPrecision(100)
+    let t = calculation(currAcc)
+    currData = BigNumber(t)
 
-    console.log(pi.toPrecision(100), "pi values")
-}
+    if (data.length === currData.toString().length) {
+      t = calculation(currAcc + 1)
+      currData = BigNumber(t)
+    }
 
-routes.get('/calc-pi',  (req, res) => {
-    let currData = "0";
-    fs.readFile("./current.json", "utf8", (err, data) => {
-        currData = data;
-    })
+    // the current flow will halt at accuracy = 24 since any calculation after that 
+    // the bignumber value just return 0
 
-    currData = calculation("0");
+    fs.writeFile("./current.json", currData.toString(), () => { });
+    res.send(currData + "");
+  });
+});
 
-    // if(currData === "0") {
-    //     currData = "3"
-    // }
+const calculationAsync = async (accuracy) => {
+  console.log(accuracy, "accuracy")
+  let i = 1;
+  let x = 3;
+  let pi = x;
+  await new Promise(res => {
+    while (x > 0) {
+      x = BigNumber(x).times(i).div(BigNumber(i).plus(1).times(4));
+      pi = BigNumber(pi).plus(BigNumber(x).div(BigNumber(i).plus(2)));
+      i = BigNumber(i).plus(2);
+    }
 
-    fs.writeFile("./current.json", currData, () => {})
-    res.send(currData)
-})
+    res(x <= 0)
+  })
+
+  return pi.toPrecision(accuracy);
+};
+
+routes.get("/calc-pi-async", async (req, res) => {
+  let currData = "0";
+  let currAcc = 0;
+  fs.readFile("./current.json", "utf8", async (err, data) => {
+    if (!data) {
+      currAcc = 1;
+    } else {
+      currAcc = data.split(".").join("").length + 1;
+    }
+
+    let t = await calculationAsync(currAcc)
+    currData = BigNumber(t)
+
+    if (data.length === currData.toString().length) {
+      t = await calculationAsync(currAcc + 1)
+      currData = BigNumber(t)
+    }
+
+    fs.writeFile("./current.json", currData.toString(), () => { });
+    res.send(currData.toString());
+  });
+});
+
+routes.get("/reset-pi", (req, res) => {
+  let resetVal = BigNumber(calculation(1)).toString();
+  fs.writeFile("./current.json", "", () => { });
+  res.send("true");
+});
 
 module.exports = routes;

@@ -9,7 +9,7 @@
   "main": "index.js",
   "devDependencies": {},
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "rm -rf current.json && nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
