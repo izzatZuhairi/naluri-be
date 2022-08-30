@@ -79,19 +79,20 @@ const calculationAsyncBigInt = async (accuracy) => {
 };
 
 routes.get("/calc-pi-async", async (req, res) => {
-  let currAcc = 0;
+  let retainVal = req.query?.keepVal;
   fs.readFile("./current.json", "utf8", async (err, data) => {
-    if (!data) {
-      currAcc = 0;
+    let t;
+    if (!retainVal) {
+      if (!data) {
+        currAcc = 0;
+      } else {
+        currAcc = data.length;
+      }
+
+      t = await calculationAsyncBigInt(currAcc);
     } else {
-      currAcc = data.length;
+      t = BigInt(data);
     }
-
-    let t = await calculationAsyncBigInt(currAcc);
-
-    // if (data?.length === t.toString().length) {
-    //   t = await calculationAsyncBigInt(currAcc + 1);
-    // }
 
     fs.writeFile("./current.json", t.toString(), () => {});
     if (t.toString().length > 1) {
